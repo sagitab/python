@@ -1,6 +1,18 @@
 import random
 money = 1000
 bet=0
+doubleAfterSplit=False
+def cardValue(card):
+     if card==11:
+          return "J"
+     elif card==12:
+          return "Q"
+     elif card==13:
+          return "K"
+     elif card==1:
+          return "A"
+     else:
+          return card
 def init():
     global playerCards
     global dealerCards
@@ -42,6 +54,8 @@ def isLost(cards):#replace in
         return True
     return False
 def getSum(cards):
+    if cards==None:
+         return 0
     sum=0
     hasA=False
     for card in cards:
@@ -51,6 +65,7 @@ def getSum(cards):
     return sum    
 def addCard(cards):
     newCard=random.randint(1, 13)
+    #newCard=2
     cards.append(newCard)
     return isLost(cards) 
 def dealerRes():
@@ -64,107 +79,148 @@ def dealerRes():
     return getSum(dealerCards)            
 def printCards(cards):
     for card in cards:
-        print(str(card)+" ")
+        print(str(cardValue(card))+" ")
 def status():
     dealerSum=getSum(dealerCards)
     playerSum=getSum(playerCards)
+    print("************************************")
     print("dealer cards- ")
     printCards(dealerCards)
     print("dealer sum-",dealerSum  )
-    
+    print("************************************")
     print("player cards- ") 
     printCards(playerCards)     
     print("player sum-",playerSum  )
-
-def endGame(dealer=0):
+    print("************************************")
+def whoWon(playerSum,dealerSum):
      global money
-     global playerCards
      global bet
-     dealerSum=0
-     if dealer==0:
-         dealerSum=dealerRes()
-     else:
-         dealerSum=dealer    
+     playerSum=int(playerSum)
+     dealerSum=int(dealerSum)
+     print("***************end***************")
      print(f"dealer sum- {dealerSum}")
-     playerSum=getSum(playerCards)
      print(f"player sum- {playerSum}")
      if playerSum>21:
-        money-=int(bet)
-        print(f"loser you have {money} ")    
+              money-=int(bet)
+              print(f"loser you have {money} ") 
+              return   
      elif dealerSum>21:
-            money+=int(bet)
-            print(f"winner winner winner you have {money} ")
-            return
-        
-    
+               money+=int(bet)
+               print(f"winner winner winner you have {money} ")
+               return
      if dealerSum>playerSum:
             money-=int(bet)
             print(f"loser you have {money} ")
             
      elif playerSum>dealerSum:
             money+=int(bet)
-            print(f"winner winner winner you have {money} ")
-                
-            
+            print(f"winner winner winner you have {money} ")    
      else:
             print (f"eaqual you have money {money}")
+
+
+def endGame(splitCount=0,split1Cards=None):
+     global money
+     global playerCards
+     global bet
+     dealerSum=0
+     if splitCount==0:
+         dealerSum=dealerRes()
+         playerSum=getSum(playerCards)
+         whoWon(playerSum,dealerSum)
+     elif splitCount==1:
+         return  
+     elif splitCount==2:
+        dealerSum=dealerRes()
+        print("************************************")
+        print("split 1-")
+        playerSum=getSum(split1Cards)
+        if playerSum<=21:
+            whoWon(playerSum,dealerSum)
+        print("************************************")
+        print("split 2-")
+        playerSum=getSum(playerCards)
+        whoWon(playerSum,dealerSum)
+        
+    
+    
                 
 
 
    
-def selectAction(dealer=0):
+def selectAction(splitCount=0,split1Cards=None):
     status()
+    global doubleAfterSplit
     global bet
     global money
+    global dealerCards
+    global playerCards
     action=input("h-hit d-double s-stay sp-split- ")
-    match action:
-        case "h":
-            print("hit")
-            if addCard(playerCards):
+    if action=="h":
+    
+        print("hit")
+        if addCard(playerCards):
                 money-=int(bet)
                 print(f"you have {getSum(playerCards)}")
                 print(f"loser you have {money} ")
                 return False
-            return True
+        return True
 
-        case "s":
+    elif action=="s":
             print("stay")
-            endGame(dealer)
+            endGame(splitCount,split1Cards)
             return False
            
             
           
-        case "sp":
+    elif action=="sp":
             print("split")
-            if len(playerCards)>2:
-                print("cant split to late")
+            lengthPlayer=len(playerCards)
+            if lengthPlayer>2 or lengthPlayer==1:
+                print("can't split to late")
                 return True
             if playerCards[0]!=playerCards[1]:
                 print("not same number")
                 return True
             else:
                 num=playerCards[0]
-                sumDealerSplit=dealerRes()
-                turn(num,sumDealerSplit)
-                turn(num,sumDealerSplit)
+                playerCards=[num]
+                temp=dealerCards.copy()
+                dealerCards=temp
+                print("************************************")
+                print("split 1-")
+                split1Cards=turn(num,1)
+                playerCards=[num]
+                dealerCards=temp
+                if doubleAfterSplit:
+                     bet=bet/2
+                print("************************************")
+                print("split 2-")
+                turn(num,2,split1Cards)
                 return False
-        case "d":
+    elif action=="d":
+            if splitCount!=0:
+                 doubleAfterSplit=True
             print("double")
             bet=int(bet)*2
             if addCard(playerCards):
                 money-=int(bet)
                 print(f"you have {getSum(playerCards)}")
                 print(f"loser you have {money} ")
-
-            endGame(dealer)
+            if splitCount!=0:
+                 status()
+            endGame(splitCount,split1Cards)
             return False    
             
-        case _:
-            print("not a valid action")        
+    else:
+            print("************************************")
+            print("not a valid action")    
+            print("************************************")    
 
 
-def turn(num=0,dealerSum=0):
-    
+def turn(num=0,splitCount=0,split1Cards=None):
+    global playerCards
+    global dealerCards
     global money
     global bet
     if num==0:
@@ -173,10 +229,15 @@ def turn(num=0,dealerSum=0):
         while toContinu:
             bet=input("enter a bet- ")
             intBet=int(bet)
-            if intBet<=money:
+            if intBet==-1:
+                 exit(0)
+            elif intBet<=money:
                 toContinu=False
+             
             else :
+                print("************************************")
                 print("unvalid bet") 
+                print("************************************")
         rounds=0
         while selectAction():
             rounds+=1
@@ -184,10 +245,12 @@ def turn(num=0,dealerSum=0):
     else:
         playerCards=[num]
         rounds=0
-        while selectAction(dealerSum):
+        while selectAction(splitCount,split1Cards):
             rounds+=1
-        playerCards[:]=[]
-        dealerCards[:]=[]  
+        if splitCount==1:
+             return playerCards
+    playerCards[:]=[]
+    dealerCards[:]=[]  
     newCard=random.randint(1, 13)
     newCard2=random.randint(1, 13)
     playerCards.append(newCard)  
@@ -196,12 +259,16 @@ def turn(num=0,dealerSum=0):
 
   
 init()  
-# newCard=random.randint(1, 13)
-# newCard2=random.randint(1, 13)
-# playerCards.append(newCard)  
-# dealerCards.append(newCard2) 
-dealerCards=[1]
-playerCards=[2,2]
-turn()   
+newCard=random.randint(1, 13)
+newCard2=random.randint(1, 13)
+playerCards.append(newCard)  
+dealerCards.append(newCard2) 
+print("****************start****************")
+#dealerCards=[1]
+#playerCards=[2,2]
+while True:
+     turn()
+     
+   
 
 
