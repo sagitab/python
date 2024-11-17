@@ -231,6 +231,10 @@ def turn(num=0,splitCount=0,split1Cards=None):
             intBet=int(bet)
             if intBet==-1:
                  exit(0)
+            elif bet==0:
+                     print("************************************")
+                     print("unvalid bet") 
+                     print("************************************")
             elif intBet<=money:
                 toContinu=False
              
@@ -267,7 +271,10 @@ print("****************start****************")
 #dealerCards=[1]
 #playerCards=[2,2]
 while True:
-     turn()
+    if money==0:
+                print("money is 0 like you")
+                exit(0)
+    turn()
      
    
 

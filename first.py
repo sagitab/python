@@ -72,9 +72,39 @@ numbers = [133, 22, 2, 33, 42, 21]
 for i in range(len(numbers)-2):
     first=numbers[i]
     second=numbers[i+1]
-    if first>second:""" 
+    if first>second: 
 def factorial(n):
     if n==1:
         return 1
     return n*factorial(n-1)
-print(factorial(4))
+print(factorial(4))"""
+
+import speedtest
+from time import sleep
+from datetime import datetime
+
+def addSpeed():
+    st = speedtest.Speedtest(secure=True)
+    st.get_best_server()
+    download=st.download()
+    upload=st.upload()
+    timestamp = datetime.now().timestamp()
+    dt_object = datetime.fromtimestamp(timestamp)
+    dateFull=dt_object.strftime("%d-%m-%Y %H:%M:%S")
+    f = open("speed.csv", "a")
+    #f.write(f"\nDownload speed: {download / 1_000_000:.2f} Mbps")
+    #f.write(f"\nUpload speed: {upload / 1_000_000:.2f} Mbps")
+    f.write(f"\n{dateFull},{download / 1_000_000:.2f},{upload / 1_000_000:.2f}")
+    f.close()
+    f = open("speed.csv", "r")
+    print("\n",f.read())
+    f.close()
+
+
+# print(f"Download speed: {download / 1_000_000:.2f} Mbps")
+# print(f"Upload speed: {upload / 1_000_000:.2f} Mbps")
+
+while True:
+     addSpeed()
+     sleep(5)
+
