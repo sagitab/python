@@ -28,8 +28,7 @@ pipeline {
         }
         stage('Build') {
             steps {
-                echo 'Build Stage: Building the project...'
-                echo "${KEY}" 
+                echo 'Build Stage: Building the project...' 
             }
         }
         stage('Test') {
