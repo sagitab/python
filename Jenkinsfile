@@ -1,10 +1,5 @@
 pipeline {
     agent any
-    
-    environment {
-        KEY = credentials('key')  // Reference the credentials ID
-    }
-
     triggers {
         pollSCM('* * * * *') // Poll SCM every minute
     }
